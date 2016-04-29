@@ -1,0 +1,99 @@
+<html>
+
+<head>
+    <title>HTTP Hound</title>
+</head>
+
+<body>
+    <div id="statuses">
+        <table id="statustable">
+
+        </table>
+    </div>
+    <div id="links"></div>
+
+    <script src="./bower_components/jquery/jquery.js"></script>
+    <script src="./bower_components/q/q.js"></script>
+    <script src="./bower_components/uri.js/src/URI.js"></script>
+    <script src="./bower_components/hyperagent/dist/hyperagent.js"></script>
+
+    <script>
+        $(document).ready(function() {
+
+            renderTable('http://localhost:8080');
+
+            $('#links').on('click', 'a', function(event) {
+                event.preventDefault();
+                var href = $(event.target).attr("data-next");
+                renderTable('http://localhost:8080'+href);
+                return false;
+            });
+
+        });
+
+        function renderTable(url) {
+            var api = new Hyperagent.Resource(url);
+            api.fetch().then(function(root) {
+                
+                var $target = $('#statuses');
+                $target.html('');
+                
+                $table = $('<table>');
+                
+                var row = $('<tr>');
+                var $cell = $('<th>');
+                $cell.text("Code");
+                $cell.appendTo(row);
+                $cell = $('<th>');
+                $cell.text("Description");
+                $cell.appendTo(row);
+                $cell = $('<th>');
+                $cell.text("Meaning");
+                $cell.appendTo(row);
+                $cell = $('<th>');
+                $cell.text("Image");
+                $cell.appendTo(row);
+                row.appendTo($table);
+                
+                root.embedded.statuses.forEach(function logArrayElements(element, index, array) {
+                    var row = $('<tr>');
+
+                    for (var prop in element.props) {
+                        var $cell = $('<td>');
+
+                        $cell.text(element.props[prop]); //TODO make an href for the code property on the embedded resource
+                        $cell.appendTo(row);
+                    }
+
+                    row.appendTo($table);
+                });
+                    
+                $table.appendTo($target);
+
+                var $links = $('#links');
+                $links.html('');
+
+                if (root.links.next) {
+                    var next = $('<a>');
+                    next.attr("href", "#");
+                    next.attr("data-next", root.links.next.href);
+                    next.html("next");
+                    next.appendTo($links);
+                }
+
+                if (root.links.prev) {
+                    var prev = $('<a>');
+                    prev.attr("href","#");
+                    prev.attr("data-next", root.links.prev.href);
+                    prev.html("prev");
+                    prev.appendTo($links);
+                }
+
+            }, function(err) {
+                console.warn('Error fetching API root', err);
+            });
+        }
+    </script>
+</body>
+
+</html>
