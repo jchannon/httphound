@@ -5,12 +5,9 @@
 </head>
 
 <body>
-    <div id="statuses">
-        <table id="statustable">
-
-        </table>
-    </div>
+    <div id="statuses"></div>
     <div id="links"></div>
+    <div id="detail"></div>
 
     <script src="./bower_components/jquery/jquery.js"></script>
     <script src="./bower_components/q/q.js"></script>
@@ -25,21 +22,28 @@
             $('#links').on('click', 'a', function(event) {
                 event.preventDefault();
                 var href = $(event.target).attr("data-next");
-                renderTable('http://localhost:8080'+href);
+                renderTable('http://localhost:8080' + href);
+                return false;
+            });
+
+            $('#statuses').on('click', 'a', function(event) {
+                event.preventDefault();
+                var href = $(event.target).attr("data-next");
+                renderDetails('http://localhost:8080' + href);
                 return false;
             });
 
         });
 
         function renderTable(url) {
+            clear();
+
             var api = new Hyperagent.Resource(url);
             api.fetch().then(function(root) {
-                
                 var $target = $('#statuses');
-                $target.html('');
-                
+
                 $table = $('<table>');
-                
+
                 var row = $('<tr>');
                 var $cell = $('<th>');
                 $cell.text("Code");
@@ -54,24 +58,30 @@
                 $cell.text("Image");
                 $cell.appendTo(row);
                 row.appendTo($table);
-                
+
                 root.embedded.statuses.forEach(function logArrayElements(element, index, array) {
                     var row = $('<tr>');
 
                     for (var prop in element.props) {
                         var $cell = $('<td>');
-
-                        $cell.text(element.props[prop]); //TODO make an href for the code property on the embedded resource
+                        if (prop == "code") {
+                            var next = $('<a>');
+                            next.attr("href", "#");
+                            next.attr("data-next", "/" + element.props[prop]);
+                            next.html(element.props[prop]);
+                            next.appendTo($cell);
+                        } else {
+                            $cell.text(element.props[prop]); //TODO make an href for the code property on the embedded resource
+                        }
                         $cell.appendTo(row);
                     }
 
                     row.appendTo($table);
                 });
-                    
+
                 $table.appendTo($target);
 
                 var $links = $('#links');
-                $links.html('');
 
                 if (root.links.next) {
                     var next = $('<a>');
@@ -83,7 +93,7 @@
 
                 if (root.links.prev) {
                     var prev = $('<a>');
-                    prev.attr("href","#");
+                    prev.attr("href", "#");
                     prev.attr("data-next", root.links.prev.href);
                     prev.html("prev");
                     prev.appendTo($links);
@@ -92,6 +102,55 @@
             }, function(err) {
                 console.warn('Error fetching API root', err);
             });
+        }
+
+        function renderDetails(url) {
+            clear();
+            var api = new Hyperagent.Resource(url);
+            api.fetch().then(function(root) {
+                    var $detail = $('#detail');
+                    
+                    var code = $('<p>');
+                    code.text(root.props.code);
+                    code.appendTo($detail);
+                    
+                    var meaning = $('<p>');
+                    meaning.text(root.props.meaning);
+                    meaning.appendTo($detail);
+                    
+                    var description = $('<p>');
+                    description.text(root.props.description);
+                    description.appendTo($detail);
+                    
+                    var image = $('<img>');
+                    image.attr("src", root.props.imageurl);
+                    image.appendTo($detail);
+                
+                    var $links = $('#links');
+                    if (root.links.index) {
+                        var home = $('<a>');
+                        home.attr("href", "#");
+                        home.attr("data-next", root.links.index.href);
+                        home.html("home");
+                        home.appendTo($links);
+                    }
+
+
+                },
+                function(err) {
+                    console.warn('Error fetching API root', err);
+                });
+        }
+
+        function clear() {
+            var $detail = $('#detail');
+            $detail.html('');
+
+            var $target = $('#statuses');
+            $target.html('');
+
+            var $links = $('#links');
+            $links.html('');
         }
     </script>
 </body>
