@@ -59,7 +59,7 @@ function home(req, res, next) {
 
     var resource = new hal.Resource({
         total: pagedData.total
-    }, '/poo');
+    }, '/');
     
     if (offset >= 0 && offset <= pagedData.total - 20){
       resource.link(new hal.Link("next", "/?offset="+(offset+10)));
