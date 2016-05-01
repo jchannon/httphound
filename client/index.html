@@ -1,158 +1,167 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTTP Hound</title>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
-<head>
-    <title>HTTP Hound</title>
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
 </head>
 
 <body>
-    <div id="statuses"></div>
-    <div id="links"></div>
-    <div id="detail"></div>
+    <div class="container-fluid">
+        <div id="statuses" class="row"></div>
+        <div id="links" class="row"></div>
+        <div id="detail"></div>
 
-    <script src="./bower_components/jquery/jquery.js"></script>
-    <script src="./bower_components/q/q.js"></script>
-    <script src="./bower_components/uri.js/src/URI.js"></script>
-    <script src="./bower_components/hyperagent/dist/hyperagent.js"></script>
+        <script src="./bower_components/jquery/jquery.js"></script>
+        <script src="./bower_components/q/q.js"></script>
+        <script src="./bower_components/uri.js/src/URI.js"></script>
+        <script src="./bower_components/hyperagent/dist/hyperagent.js"></script>
 
-    <script>
-        $(document).ready(function() {
+        <script>
+            $(document).ready(function() {
 
-            renderTable('http://localhost:8080');
+                renderTable('http://localhost:8080');
 
-            $('#links').on('click', 'a', function(event) {
-                event.preventDefault();
-                var href = $(event.target).attr("data-next");
-                renderTable('http://localhost:8080' + href);
-                return false;
-            });
-
-            $('#statuses').on('click', 'a', function(event) {
-                event.preventDefault();
-                var href = $(event.target).attr("data-next");
-                renderDetails('http://localhost:8080' + href);
-                return false;
-            });
-
-        });
-
-        function renderTable(url) {
-            clear();
-
-            var api = new Hyperagent.Resource(url);
-            api.fetch().then(function(root) {
-                var $target = $('#statuses');
-
-                $table = $('<table>');
-
-                var row = $('<tr>');
-                var $cell = $('<th>');
-                $cell.text("Code");
-                $cell.appendTo(row);
-                $cell = $('<th>');
-                $cell.text("Description");
-                $cell.appendTo(row);
-                $cell = $('<th>');
-                $cell.text("Meaning");
-                $cell.appendTo(row);
-                $cell = $('<th>');
-                $cell.text("Image");
-                $cell.appendTo(row);
-                row.appendTo($table);
-
-                root.embedded.statuses.forEach(function logArrayElements(element, index, array) {
-                    var row = $('<tr>');
-
-                    for (var prop in element.props) {
-                        var $cell = $('<td>');
-                        if (prop == "code") {
-                            var next = $('<a>');
-                            next.attr("href", "#");
-                            next.attr("data-next", "/" + element.props[prop]);
-                            next.html(element.props[prop]);
-                            next.appendTo($cell);
-                        } else {
-                            $cell.text(element.props[prop]); //TODO make an href for the code property on the embedded resource
-                        }
-                        $cell.appendTo(row);
-                    }
-
-                    row.appendTo($table);
+                $('#links').on('click', 'a', function(event) {
+                    event.preventDefault();
+                    var href = $(event.target).attr("data-next");
+                    renderTable('http://localhost:8080' + href);
+                    return false;
                 });
 
-                $table.appendTo($target);
+                $('#statuses').on('click', 'a', function(event) {
+                    event.preventDefault();
+                    var href = $(event.target).attr("data-next");
+                    renderDetails('http://localhost:8080' + href);
+                    return false;
+                });
 
-                var $links = $('#links');
-
-                if (root.links.next) {
-                    var next = $('<a>');
-                    next.attr("href", "#");
-                    next.attr("data-next", root.links.next.href);
-                    next.html("next");
-                    next.appendTo($links);
-                }
-
-                if (root.links.prev) {
-                    var prev = $('<a>');
-                    prev.attr("href", "#");
-                    prev.attr("data-next", root.links.prev.href);
-                    prev.html("prev");
-                    prev.appendTo($links);
-                }
-
-            }, function(err) {
-                console.warn('Error fetching API root', err);
             });
-        }
 
-        function renderDetails(url) {
-            clear();
-            var api = new Hyperagent.Resource(url);
-            api.fetch().then(function(root) {
-                    var $detail = $('#detail');
-                    
-                    var code = $('<p>');
-                    code.text(root.props.code);
-                    code.appendTo($detail);
-                    
-                    var meaning = $('<p>');
-                    meaning.text(root.props.meaning);
-                    meaning.appendTo($detail);
-                    
-                    var description = $('<p>');
-                    description.text(root.props.description);
-                    description.appendTo($detail);
-                    
-                    var image = $('<img>');
-                    image.attr("src", root.props.imageurl);
-                    image.appendTo($detail);
-                
+            function renderTable(url) {
+                clear();
+
+                var api = new Hyperagent.Resource(url);
+                api.fetch().then(function(root) {
+                    var $target = $('#statuses');
+
+                    var $table = $('<table>').addClass('table table-striped');
+
+                    var row = $('<tr>');
+                    var $cell = $('<th>');
+                    $cell.text("Code");
+                    $cell.appendTo(row);
+                    $cell = $('<th>');
+                    $cell.text("Description");
+                    $cell.appendTo(row);
+                    $cell = $('<th>');
+                    $cell.text("Meaning");
+                    $cell.appendTo(row);
+                    $cell = $('<th>');
+                    $cell.text("Image");
+                    $cell.appendTo(row);
+                    row.appendTo($table);
+
+                    root.embedded.statuses.forEach(function logArrayElements(element, index, array) {
+                        var row = $('<tr>');
+
+                        for (var prop in element.props) {
+                            var $cell = $('<td>');
+                            if (prop == "code") {
+                                var next = $('<a>');
+                                next.attr("href", "#");
+                                next.attr("data-next", "/" + element.props[prop]);
+                                next.html(element.props[prop]);
+                                next.appendTo($cell);
+                            } else {
+                                $cell.text(element.props[prop]); //TODO make an href for the code property on the embedded resource
+                            }
+                            $cell.appendTo(row);
+                        }
+
+                        row.appendTo($table);
+                    });
+
+                    $table.appendTo($target);
+
                     var $links = $('#links');
-                    if (root.links.index) {
-                        var home = $('<a>');
-                        home.attr("href", "#");
-                        home.attr("data-next", root.links.index.href);
-                        home.html("home");
-                        home.appendTo($links);
+
+                    if (root.links.next) {
+                        var next = $('<a>').addClass("btn btn-primary");
+                        next.attr("href", "#");
+                        next.attr("data-next", root.links.next.href);
+                        next.html("next");
+                        next.appendTo($links);
                     }
 
+                    if (root.links.prev) {
+                        var prev = $('<a>').addClass("btn btn-primary");
+                        prev.attr("href", "#");
+                        prev.attr("data-next", root.links.prev.href);
+                        prev.html("prev");
+                        prev.appendTo($links);
+                    }
 
-                },
-                function(err) {
+                }, function(err) {
                     console.warn('Error fetching API root', err);
                 });
-        }
+            }
 
-        function clear() {
-            var $detail = $('#detail');
-            $detail.html('');
+            function renderDetails(url) {
+                clear();
+                var api = new Hyperagent.Resource(url);
+                api.fetch().then(function(root) {
+                        var $detail = $('#detail');
 
-            var $target = $('#statuses');
-            $target.html('');
+                        var code = $('<p>');
+                        code.text(root.props.code);
+                        code.appendTo($detail);
 
-            var $links = $('#links');
-            $links.html('');
-        }
-    </script>
+                        var meaning = $('<p>');
+                        meaning.text(root.props.meaning);
+                        meaning.appendTo($detail);
+
+                        var description = $('<p>');
+                        description.text(root.props.description);
+                        description.appendTo($detail);
+
+                        var image = $('<img>');
+                        image.attr("src", root.props.imageurl);
+                        image.appendTo($detail);
+
+                        var $links = $('#links');
+                        if (root.links.index) {
+                            var home = $('<a>');
+                            home.attr("href", "#");
+                            home.attr("data-next", root.links.index.href);
+                            home.html("home");
+                            home.appendTo($links);
+                        }
+
+
+                    },
+                    function(err) {
+                        console.warn('Error fetching API root', err);
+                    });
+            }
+
+            function clear() {
+                var $detail = $('#detail');
+                $detail.html('');
+
+                var $target = $('#statuses');
+                $target.html('');
+
+                var $links = $('#links');
+                $links.html('');
+            }
+        </script>
+    </div>
 </body>
 
 </html>
