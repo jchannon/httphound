@@ -14,8 +14,10 @@
 <body>
     <div class="container-fluid">
         <div id="statuses" class="row"></div>
-        <div id="links" class="row"></div>
-        <div id="detail"></div>
+        <div id="detail" class="row"></div>
+        <nav>
+            <ul class="pager" id="nav"></ul>
+        </nav>
 
         <script src="./bower_components/jquery/jquery.js"></script>
         <script src="./bower_components/q/q.js"></script>
@@ -26,8 +28,8 @@
             $(document).ready(function() {
 
                 renderTable('http://localhost:8080');
-
-                $('#links').on('click', 'a', function(event) {
+                
+                $('#nav').on('click', 'a', function(event) {
                     event.preventDefault();
                     var href = $(event.target).attr("data-next");
                     renderTable('http://localhost:8080' + href);
@@ -89,23 +91,31 @@
 
                     $table.appendTo($target);
 
-                    var $links = $('#links');
-
-                    if (root.links.next) {
-                        var next = $('<a>').addClass("btn btn-primary");
-                        next.attr("href", "#");
-                        next.attr("data-next", root.links.next.href);
-                        next.html("next");
-                        next.appendTo($links);
-                    }
+                    var $nav = $('#nav');
 
                     if (root.links.prev) {
-                        var prev = $('<a>').addClass("btn btn-primary");
-                        prev.attr("href", "#");
-                        prev.attr("data-next", root.links.prev.href);
-                        prev.html("prev");
-                        prev.appendTo($links);
+                       
+                        var prevli = $('<li>');
+                        var prev1 = $('<a>');
+                        prev1.attr("href", "#");
+                        prev1.attr("data-next", root.links.prev.href);
+                        prev1.html("prev");
+                        prev1.appendTo(prevli);
+                        prevli.appendTo($nav);
                     }
+
+                    if (root.links.next) {
+                       
+                        var nextli = $('<li>');
+                        var next1 = $('<a>');
+                        next1.attr("href", "#");
+                        next1.attr("data-next", root.links.next.href);
+                        next1.html("next");
+                        next1.appendTo(nextli);
+                        nextli.appendTo($nav);
+                    }
+
+
 
                 }, function(err) {
                     console.warn('Error fetching API root', err);
@@ -136,7 +146,7 @@
 
                         var $links = $('#links');
                         if (root.links.index) {
-                            var home = $('<a>');
+                            var home = $('<a>').addClass("btn btn-primary");
                             home.attr("href", "#");
                             home.attr("data-next", root.links.index.href);
                             home.html("home");
@@ -157,8 +167,8 @@
                 var $target = $('#statuses');
                 $target.html('');
 
-                var $links = $('#links');
-                $links.html('');
+                var $nav = $('#nav');
+                $nav.html('');
             }
         </script>
     </div>
