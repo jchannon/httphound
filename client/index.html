@@ -105,21 +105,19 @@
                 api.fetch().then(function(root) {
                         var $detail = $('#detail');
 
-                        var code = $('<p>');
-                        code.text(root.props.code);
-                        code.appendTo($detail);
+                        
 
-                        var meaning = $('<p>');
-                        meaning.text(root.props.meaning);
-                        meaning.appendTo($detail);
-
+                        var imgdiv = $('<div>');
+                        var image = $('<img>').addClass('img-responsive center-block');
+                        image.attr("src", root.props.imageurl);
+                        image.appendTo(imgdiv);
+                        imgdiv.appendTo($detail);
+                        
+                        var div = $('<div>').addClass('col-md-6 col-md-offset-3 text-center');
                         var description = $('<p>');
                         description.text(root.props.description);
-                        description.appendTo($detail);
-
-                        var image = $('<img>');
-                        image.attr("src", root.props.imageurl);
-                        image.appendTo($detail);
+                        description.appendTo(div);
+                        div.appendTo($detail);
 
                         var $nav = $('#nav');
                         if (root.links.index) {
