@@ -1,6 +1,6 @@
 # httphound
 
-A working example of a an API returning HAL+JSON media type and a client consuming it.
+A working example of a an API returning HAL+JSON media type and a client consuming it. (Inspired by [http://httpstatusdogs.com](http://httpstatusdogs.com))
 
 ## Usage
 
